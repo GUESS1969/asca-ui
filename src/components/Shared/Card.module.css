@@ -1,0 +1,31 @@
+.card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cardHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.cardBody {
+    margin-top: 8px;
+    font-size: 1rem;
+    color: #666;
+}
+
+.cardFooter {
+    margin-top: 12px;
+    text-align: right;
+}
