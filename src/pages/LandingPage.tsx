@@ -1,7 +1,5 @@
-// src/pages/LandingPage.tsx
- // eslint-disable-next-line 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Use useNavigate instead of useHistory
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import backgroundImage from './assets/bg-image.jpg';
 import SocialMediaLinks from '../pages/SocialMediaLinks';
 import { ConnectWalletButton } from '@cardano-foundation/cardano-connect-with-wallet';
@@ -12,6 +10,74 @@ const LandingPage: React.FC = () => {
     const { isConnected, connectWallet, disconnect } = useWallet();
     const { network, setNetwork } = useNetwork(); // Get the network and a setter function to change it
     const navigate = useNavigate(); // Use useNavigate instead of useHistory
+
+    // State for form inputs
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
+    const [loginData, setLoginData] = useState({
+        email: '',
+        password: ''
+    });
+    const [error, setError] = useState('');
+    const [isLoginMode, setIsLoginMode] = useState(true); // Toggle between login and signup mode
+
+    // Handle form input changes
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
+    };
+
+    const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setLoginData({ ...loginData, [id]: value });
+    };
+
+    // Handle form submission
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (isLoginMode) {
+            // Handle login submission
+            if (!loginData.email || !loginData.password) {
+                setError('Tous les champs sont obligatoires.');
+                return;
+            }
+
+            // Simulate login submission (replace this with actual API logic)
+            console.log('Login Data Submitted:', loginData);
+            setError('');
+            alert('Connexion réussie!');
+            navigate('/dashboard'); // Redirect after successful login
+        } else {
+            // Handle signup submission
+            if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+                setError('Tous les champs sont obligatoires.');
+                return;
+            }
+
+            if (formData.password !== formData.confirmPassword) {
+                setError('Les mots de passe ne correspondent pas.');
+                return;
+            }
+
+            // Simulate signup submission (replace this with actual API logic)
+            console.log('Signup Data Submitted:', formData);
+            setError('');
+            alert('Inscription réussie! Merci de nous avoir rejoint.');
+            setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            });
+        }
+    };
 
     useEffect(() => {
         if (isConnected) {
@@ -32,18 +98,31 @@ const LandingPage: React.FC = () => {
             {/* Navbar */}
             <nav className="flex items-center justify-between p-6">
                 <div className="flex items-center">
-                    <span className="text-xl font-bold text-blue-600">Protocole ASCA </span> 
-                    <span className="text-xl font-bold text-blue-600"> </span>  
+                    <span className="text-xl font-bold text-blue-600">Protocole ASCA</span>
                 </div>
-                <div className="flex items-center space-x-8 text-gray-700">                
-                    <a href="#features" className="hover:text-blue-600">Fonctionnalités du protocole.</a>
+                <div className="flex items-center space-x-8 text-gray-700">
+                    <a href="#features" className="hover:text-blue-600">Fonctionnalités du protocole</a>
                     <a href="#how-it-works" className="hover:text-blue-600">Comment ça marche</a>
                     <a href="#testimonials" className="hover:text-blue-600">Témoignages des utilisateurs</a>
                 </div>
                 <div className="flex items-center space-x-4">
-                    <button className="text-gray-700 hover:text-blue-600">Connexion</button>
+                    <button 
+                        className="text-gray-700 hover:text-blue-600"
+                        onClick={() => setIsLoginMode(true)}
+                    >
+                        Connexion
+                    </button>
+                    <button 
+                        className="text-gray-700 hover:text-blue-600"
+                        onClick={() => setIsLoginMode(false)}
+                    >
+                        Inscription
+                    </button>
                     {isConnected ? (
-                        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700" onClick={disconnect}>
+                        <button 
+                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                            onClick={disconnect}
+                        >
                             Déconnexion
                         </button>
                     ) : (
@@ -71,40 +150,111 @@ const LandingPage: React.FC = () => {
                 {/* Left side: Hero Text */}
                 <div className="w-full max-w-md pr-8">
                     <h1 className="text-5xl font-extrabold text-gray-900 leading-tight">
-                        Le protocole ASCA <span className="text-blue-600">simplifie les épargnes et prêts </span> pour les communautés.
+                        Le protocole ASCA <span className="text-blue-600">simplifie les épargnes et prêts</span> pour les communautés.
                     </h1>
                     <p className="mt-4 text-lg text-gray-500">
-                    La plupart des protocoles de tontine sont sécurisés, mais difficiles à utiliser. Nous faisons le compromis inverse et nous assurons que vos actifs soient toujours protégés..
+                        La plupart des protocoles de tontine sont sécurisés, mais difficiles à utiliser. Nous faisons le compromis inverse et nous assurons que vos actifs soient toujours protégés.
                     </p>
                 </div>
 
                 {/* Right side: Form */}
                 <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
                     <div>
-                        <p className="text-xl font-bold">Rejoignez la communauté</p>
-                        <p className="mt-2 text-gray-500">Soyez les premiers informés des nouvelles fonctionnalités, des événements communautaires et des offres exclusives.</p>
+                        <p className="text-xl font-bold">{isLoginMode ? 'Connexion' : 'Rejoignez la communauté'}</p>
+                        <p className="mt-2 text-gray-500">
+                            {isLoginMode ? 'Connectez-vous pour accéder à votre compte.' : 'Soyez les premiers informés des nouvelles fonctionnalités, des événements communautaires et des offres exclusives.'}
+                        </p>
                     </div>
-                    <form>
-                        <div className="mb-4">
-                            <label htmlFor="first-name" className="block text-gray-700">Prénom*</label>
-                            <input type="text" id="first-name" className="mt-1 p-2 w-full border border-gray-300 rounded-lg" />
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="last-name" className="block text-gray-700">Nom*</label>
-                            <input type="text" id="last-name" className="mt-1 p-2 w-full border border-gray-300 rounded-lg" />
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="email" className="block text-gray-700">Email Adresse*</label>
-                            <input type="email" id="email" className="mt-1 p-2 w-full border border-gray-300 rounded-lg" />
-                        </div>
-                        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
-                            S'inscrire
+                    <form onSubmit={handleSubmit}>
+                        {isLoginMode ? (
+                            <>
+                                <div className="mb-4">
+                                    <label htmlFor="email" className="block text-gray-700">Email Adresse*</label>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        value={loginData.email} 
+                                        onChange={handleLoginChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="password" className="block text-gray-700">Mot de Passe*</label>
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        value={loginData.password} 
+                                        onChange={handleLoginChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="mb-4">
+                                    <label htmlFor="firstName" className="block text-gray-700">Prénom*</label>
+                                    <input 
+                                        type="text" 
+                                        id="firstName" 
+                                        value={formData.firstName} 
+                                        onChange={handleInputChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="lastName" className="block text-gray-700">Nom*</label>
+                                    <input 
+                                        type="text" 
+                                        id="lastName" 
+                                        value={formData.lastName} 
+                                        onChange={handleInputChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="email" className="block text-gray-700">Email Adresse*</label>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        value={formData.email} 
+                                        onChange={handleInputChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="password" className="block text-gray-700">Mot de Passe*</label>
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        value={formData.password} 
+                                        onChange={handleInputChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="confirmPassword" className="block text-gray-700">Confirmer le Mot de Passe*</label>
+                                    <input 
+                                        type="password" 
+                                        id="confirmPassword" 
+                                        value={formData.confirmPassword} 
+                                        onChange={handleInputChange} 
+                                        className="mt-1 p-2 w-full border border-gray-300 rounded-lg" 
+                                    />
+                                </div>
+                            </>
+                        )}
+                        {error && <p className="text-red-500 mb-4">{error}</p>}
+                        <button 
+                            type="submit" 
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                        >
+                            {isLoginMode ? 'Se Connecter' : 'S\'inscrire'}
                         </button>
                         <div className="mt-4 text-sm text-gray-600">
                             <p>
                                 <strong>*</strong> Les informations que vous fournissez seront stockées de manière sécurisée et ne seront pas partagées avec des tiers sans votre consentement explicite. 
-                                En vous inscrivant, vous acceptez notre <a href="#" className="text-blue-600 underline">Politique de Confidentialité </a> et  
-                                <a href="#" className="text-blue-600 underline"> nos Conditions d'Utilisation.</a>.
+                                En vous inscrivant, vous acceptez notre <a href="#" className="text-blue-600 underline">Politique de Confidentialité</a> et 
+                                <a href="#" className="text-blue-600 underline">nos Conditions d'Utilisation</a>.
                             </p>
                         </div>
                     </form>
@@ -112,24 +262,30 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Features Section */}
-            <div id="features" className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Fonctionnalités Clés</h2>
-                    <p className="mt-4 text-lg text-gray-500">
-                    Découvrez les fonctionnalités puissantes qui font du protocole ASCA le meilleur choix pour l'éparges et les prêts communautaires.
-                    </p>
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Sécurisé et Transparent.</h3>
-                            <p className="mt-2 text-gray-500">Notre protocole garantit que vos actifs sont protégés et que toutes les transactions sont transparentes et vérifiables.</p>
+            <div id="features" className="py-16 bg-gray-100">
+                <div className="container mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Fonctionnalités du Protocole</h2>
+                    <div className="flex flex-wrap -mx-4">
+                        {/* Feature 1 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Sécurité Avancée</span></h3>
+                                <p className="text-gray-700">Nous utilisons les dernières technologies pour garantir la sécurité et la confidentialité de vos actifs.</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Gouvernance  Décentralisée</h3>
-                            <p className="mt-2 text-gray-500">Participez à la gouvernance de votre communauté grâce au vote et à la prise de décision.</p>
+                        {/* Feature 2 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Interface Intuitive</span></h3>
+                                <p className="text-gray-700">Notre interface utilisateur est conçue pour être facile à utiliser, même pour les débutants.</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Conformité en temps réel.</h3>
-                            <p className="mt-2 text-gray-500">Les contrôles de conformité automatisés garantissent que tous les participants respectent les normes nécessaires.</p>
+                        {/* Feature 3 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Support Communautaire</span></h3>
+                                <p className="text-gray-700">Rejoignez une communauté active et bénéficiez d'un support et de conseils de la part d'autres utilisateurs.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,74 +293,76 @@ const LandingPage: React.FC = () => {
 
             {/* How It Works Section */}
             <div id="how-it-works" className="py-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Comment ça marche</h2>
-                    <p className="mt-4 text-lg text-gray-500">
-                       Commencer avec le protocole ASCA est facile. Suivez ces étapes ci-dessous.
-                    </p>
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Etape 1: Connectez votre portefeuille</h3>
-                            <p className="mt-2 text-gray-500">Connectez votre portefeuille pour rejoindre le protocole ASCA et commencer à gérer vos fonds</p>
+                <div className="container mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Comment ça marche</h2>
+                    <div className="flex flex-wrap -mx-4">
+                        {/* Step 1 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Étape 1</span></h3>
+                                <p className="text-gray-700">Connectez votre portefeuille pour commencer à utiliser notre protocole.</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Etape 2: Contribuer et Économiser.</h3>
-                            <p className="mt-2 text-gray-500">Commencez à contribuer à la tontine de votre communauté et regardez vos économies croître.</p>
+                        {/* Step 2 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Étape 2</span></h3>
+                                <p className="text-gray-700">Créez votre compte ou rejoignez une tontine en quelques clics.</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-xl font-bold text-blue-600">Etape 3: Participez à la Gouvernance</h3>
-                            <p className="mt-2 text-gray-500">Votez sur des décisions importantes et contribuez à façonner l'avenir de votre communauté.</p>
+                        {/* Step 3 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2"><span className="text-blue-600">Étape 3</span></h3>
+                                <p className="text-gray-700">Profitez des avantages de notre protocole sécurisé et transparent.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Testimonials Section */}
-            <div id="testimonials" className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Témoignages de la communauté</h2>
-                    <p className="mt-4 text-lg text-gray-500">
-                    Découvrez ce que d'autres communautés disent de leur expérience avec le protocole ASCA.
-                    </p>
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <p className="text-lg text-gray-700">"Le protocole ASCA a transformé nos économies communautaires. Il est facile à utiliser et complètement sécurisé !"</p>
-                            <p className="mt-4 text-gray-500">- Leader Commaunautaire</p>
+            <div id="testimonials" className="py-16 bg-gray-100">
+                <div className="container mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Témoignages des Utilisateurs</h2>
+                    <div className="flex flex-wrap -mx-4">
+                        {/* Testimonial 1 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <p className="text-gray-700">“Le protocole ASCA a révolutionné la façon dont je gère mes épargnes. Très facile à utiliser et très sécurisé!”</p>
+                                <p className="mt-4 font-semibold text-gray-900">Micro Credit - CREDIT FEF</p>
+                                <p className="text-gray-600">Utilisateur satisfait</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <p className="text-lg text-gray-700">"Pouvoir accéder à des prêts sans passer par les banques traditionnelles a été une véritable révolution pour nous."</p>
-                            <p className="mt-4 text-gray-500">- Utilisateur</p>
+                        {/* Testimonial 2 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <p className="text-gray-700">“Une expérience utilisateur exceptionnelle! J'apprécie vraiment le support communautaire.”</p>
+                                <p className="mt-4 font-semibold text-gray-900">JEUNES GUINEENS DE FRANCE</p>
+                                <p className="text-gray-600">Client fidèle</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <p className="text-lg text-gray-700">"La gouvernance sur chaîne assure la transparence dans chaque décision prise."</p>
-                            <p className="mt-4 text-gray-500">- Membre</p>
+                        {/* Testimonial 3 */}
+                        <div className="w-full md:w-1/3 px-4 mb-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <p className="text-gray-700">“Un service incroyable avec une sécurité de premier ordre. Je recommande vivement!”</p>
+                                <p className="mt-4 font-semibold text-gray-900">Tontine Amour Plus</p>
+                                <p className="text-gray-600">Utilisateur heureux</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* Companies Section */}
-            <div className="mt-16 pb-20">
-                <p className="text-center text-gray-500 text-lg">Nous font confiance</p>
-                <div className="mt-8 flex justify-center space-x-10">
-                    <img src="https://via.placeholder.com/120x40?text=IUA-ABIDJAN" alt="IUA" />
-                    <img src="https://via.placeholder.com/120x40?text=IADEC" alt="IADEC" />
-                    <img src="https://via.placeholder.com/120x40?text=ES2I" alt="ES2I" />
-                    <img src="https://via.placeholder.com/120x40?text=CREDIT FEF" alt="CREDIT FEF" />
-                    <img src="https://via.placeholder.com/120x40?text=ATLANTIS" alt="ATLANTIS" />
-                    <img src="https://via.placeholder.com/120x40?text=IVOGROUP" alt="IVOGROUP" />
-                </div>
-            </div>
-
-            {/* Footer */}
-            <footer className="bg-gray-800 py-8">
+                        {/* Footer */}
+                        <footer className="bg-gray-800 py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">          
                     <SocialMediaLinks />  
-                    <p>&copy; 2024 Protocole ASCA. Tous droits réservés.</p>
+                    <p>&copy; 2024 Protocole ASCA développé par <span className="text-blue-600">EBURNIE LABS</span>. Tous droits réservés.</p>
                 </div>
             </footer>
         </div>
+        
     );
-}
+};
 
 export default LandingPage;
